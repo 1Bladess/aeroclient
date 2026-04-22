@@ -42,7 +42,7 @@ if errorlevel 1 (
 )
 
 echo [Aero] Opening website pages...
-start "" "https://aero-client.github.io/aero/"
+start "" "https://1bladess.github.io/aeroclient/"
 start "" "http://localhost:8080/admin.html"
 
 echo [Aero] Done. Keep the server window open while using admin.
