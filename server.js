@@ -14,13 +14,15 @@ const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'store.json');
 const PRESENCE_TTL_SECONDS = Number(process.env.PRESENCE_TTL_SECONDS || 60);
 
-const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || '').trim();
-const ADMIN_PASSWORD_HASH = (process.env.ADMIN_PASSWORD_HASH || '').trim();
+const DEFAULT_ADMIN_USERNAME = 'Duckyblade';
+const DEFAULT_ADMIN_PASSWORD_HASH = '$2a$12$t9Krc/IYZb/OSUoQ1YJmseP/hLK9eGVVZy2PCkqqNSjNeRcIu9Caq';
+const ADMIN_USERNAME = DEFAULT_ADMIN_USERNAME;
+const ADMIN_PASSWORD_HASH = DEFAULT_ADMIN_PASSWORD_HASH;
 const JWT_SECRET = (process.env.JWT_SECRET || '').trim();
 const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || '12h').trim();
 
-if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH || !JWT_SECRET) {
-  console.error('Missing required env: ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_SECRET');
+if (!JWT_SECRET) {
+  console.error('Missing required env: JWT_SECRET');
   process.exit(1);
 }
 
