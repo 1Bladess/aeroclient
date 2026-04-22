@@ -14,16 +14,33 @@ if (queryApiBase) {
   localStorage.setItem('aero_api_base', queryApiBase);
 }
 
+const isGithubPages = window.location.hostname.endsWith('github.io');
 const storedApiBase = (localStorage.getItem('aero_api_base') || '').trim();
 const defaultApiBase = window.location.hostname.endsWith('github.io') ? 'http://localhost:8080' : '';
-const API_BASE = (storedApiBase || defaultApiBase).trim();
+const API_BASE = (storedApiBase || defaultApiBase).trim().replace(/\/+$/, '');
+
+function isInvalidApiBase(base) {
+  if (!base) return false;
+  try {
+    const u = new URL(base);
+    return u.hostname.endsWith('github.io');
+  } catch (_err) {
+    return true;
+  }
+}
+
+if (isInvalidApiBase(API_BASE)) {
+  localStorage.removeItem('aero_api_base');
+}
+
+const EFFECTIVE_API_BASE = isInvalidApiBase(API_BASE) ? '' : API_BASE;
 
 let authToken = (localStorage.getItem('aero_admin_token') || '').trim();
 
 function apiUrl(path) {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  if (!API_BASE) return normalizedPath;
-  return `${API_BASE.replace(/\/+$/, '')}${normalizedPath}`;
+  if (!EFFECTIVE_API_BASE) return normalizedPath;
+  return `${EFFECTIVE_API_BASE}${normalizedPath}`;
 }
 
 function authHeader() {
@@ -31,6 +48,10 @@ function authHeader() {
 }
 
 async function api(path, options = {}) {
+  if (isGithubPages && !EFFECTIVE_API_BASE) {
+    throw new Error('Backend URL missing. Open admin with ?api=https://your-backend-domain');
+  }
+
   const res = await fetch(apiUrl(path), {
     headers: {
       'Content-Type': 'application/json',
@@ -49,6 +70,10 @@ async function api(path, options = {}) {
   }
 
   return body;
+}
+
+if (isGithubPages && !EFFECTIVE_API_BASE) {
+  loginError.textContent = 'Set backend URL: admin.html?api=https://your-backend-domain';
 }
 
 async function checkSession() {
