@@ -22,6 +22,33 @@ function apiUrl(path) {
   return `${API_BASE.replace(/\/+$/, '')}${normalizedPath}`;
 }
 
+function getWebsiteClientId() {
+  const key = 'aero_web_client_id';
+  const existing = (localStorage.getItem(key) || '').trim();
+  if (existing) return existing;
+  const generated = `web-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(key, generated);
+  return generated;
+}
+
+async function sendHeartbeat() {
+  const body = {
+    clientId: getWebsiteClientId(),
+    username: 'website-guest',
+    state: 'website'
+  };
+
+  try {
+    await fetch(apiUrl('/api/presence/heartbeat'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+  } catch (_err) {
+    // Keep public page resilient if backend is temporarily unavailable.
+  }
+}
+
 async function fetchOnlineCount() {
   const res = await fetch(apiUrl('/api/presence/count'));
   if (!res.ok) return;
@@ -68,5 +95,7 @@ function escapeHtml(str) {
 
 fetchOnlineCount();
 fetchDevlog();
+sendHeartbeat();
 setInterval(fetchOnlineCount, 10000);
 setInterval(fetchDevlog, 30000);
+setInterval(sendHeartbeat, 15000);
