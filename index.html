@@ -4,6 +4,12 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Aero Client</title>
+  <script>
+    (function(){
+      var t = localStorage.getItem('aero_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -23,8 +29,43 @@
       --card-border: rgba(55,105,150,0.18);
     }
 
+      [data-theme="dark"] {
+        --sky-top:  #0c1e2e;
+        --sky-mid:  #0f2538;
+        --sky-lo:   #122a42;
+        --sky-base: #0d1f30;
+        --white:    #1a3248;
+        --steel:    #7aafce;
+        --accent:   #4a9fd4;
+        --accent2:  #6bbde0;
+        --dark:     #c8def0;
+        --mid:      #4a80aa;
+        --text:     #b8d4e8;
+        --muted:    #5a8aa8;
+        --card-bg:  rgba(12,28,44,0.78);
+        --card-border: rgba(74,159,212,0.18);
+        --sky-grad: linear-gradient(175deg, #091929 0%, #0c2033 18%, #0f2540 38%, #112a48 58%, #132e52 78%, #0d1e30 100%);
+        --nav-bg:   rgba(8,18,28,0.78);
+        --btn-ghost-bg: rgba(20,45,70,0.55);
+        --btn-ghost-border: rgba(74,159,212,0.28);
+        --vtag-bg:  rgba(20,45,70,0.45);
+        --entry-bg: rgba(14,32,50,0.78);
+        --fc-hover-bg: rgba(18,48,78,0.9);
+      }
+
+      [data-theme="light"] {
+        --sky-grad: linear-gradient(175deg, #7aa8c4 0%, #8fbdd6 18%, #a8cfe0 38%, #bcdae8 58%, #cce3ee 78%, #d8eaf3 100%);
+        --nav-bg:   rgba(185,220,242,0.45);
+        --btn-ghost-bg: rgba(255,255,255,0.35);
+        --btn-ghost-border: rgba(78,134,184,0.28);
+        --vtag-bg:  rgba(255,255,255,0.3);
+        --entry-bg: rgba(255,255,255,0.45);
+        --fc-hover-bg: rgba(255,255,255,0.75);
+      }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
+    body, nav, .sky-bg, .fc, .live-card, .stats-inner, .stat, .dl-card, .vtag, .btn-ghost, .btn-air, .btn-dl { transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease; }
 
     body {
       background: var(--sky-base);
@@ -46,6 +87,9 @@
       background: rgba(30,80,120,0.7);
       border-radius: 2px;
     }
+      [data-theme="dark"] #cur::before,
+      [data-theme="dark"] #cur::after { background: rgba(100,180,230,0.65); }
+
     #cur::before { width: 1px; height: 16px; top: -8px; left: 0; }
     #cur::after  { width: 16px; height: 1px; left: -8px; top: 0; }
 
@@ -54,9 +98,12 @@
     /* SKY */
     .sky-bg {
       position: fixed; inset: 0; z-index: 0;
-      background: linear-gradient(175deg, #7aa8c4 0%, #8fbdd6 18%, #a8cfe0 38%, #bcdae8 58%, #cce3ee 78%, #d8eaf3 100%);
+        background: var(--sky-grad, linear-gradient(175deg, #7aa8c4 0%, #8fbdd6 18%, #a8cfe0 38%, #bcdae8 58%, #cce3ee 78%, #d8eaf3 100%));
       pointer-events: none;
     }
+      [data-theme="dark"] .cloud {
+        background: radial-gradient(ellipse at 40% 45%, rgba(30,60,100,0.25) 0%, transparent 70%);
+      }
 
     .cloud {
       position: fixed; z-index: 1; pointer-events: none;
@@ -75,7 +122,7 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 200;
       display: flex; align-items: center; justify-content: space-between;
       padding: 18px 56px;
-      background: rgba(185,220,242,0.45);
+        background: var(--nav-bg, rgba(185,220,242,0.45));
       backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(78,134,184,0.12);
       animation: navIn 0.7s 0.1s cubic-bezier(.22,1,.36,1) both;
@@ -105,8 +152,21 @@
       font-size: 0.48rem; letter-spacing: 3px; color: var(--muted);
       border: 1px solid rgba(78,134,184,0.22);
       padding: 5px 14px; border-radius: 100px;
-      background: rgba(255,255,255,0.3);
+        background: var(--vtag-bg, rgba(255,255,255,0.3));
     }
+
+      #theme-toggle {
+        background: none; border: 1px solid rgba(78,134,184,0.22);
+        border-radius: 100px; padding: 6px 8px; cursor: pointer;
+        color: var(--muted); display: flex; align-items: center; justify-content: center;
+        transition: color 0.2s, border-color 0.2s;
+      }
+      #theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+      #theme-toggle svg { display: block; pointer-events: none; }
+      .icon-sun { display: block; }
+      .icon-moon { display: none; }
+      [data-theme="dark"] .icon-sun { display: none; }
+      [data-theme="dark"] .icon-moon { display: block; }
 
     /* HERO */
     .hero {
@@ -172,8 +232,8 @@
 
     .btn-ghost {
       display: inline-flex; align-items: center; gap: 10px;
-      padding: 14px 32px; background: rgba(255,255,255,0.35);
-      border: 1px solid rgba(78,134,184,0.28); color: var(--mid); border-radius: 3px;
+        padding: 14px 32px; background: var(--btn-ghost-bg, rgba(255,255,255,0.35));
+        border: 1px solid var(--btn-ghost-border, rgba(78,134,184,0.28)); color: var(--mid); border-radius: 3px;
       font-family: 'Space Mono', monospace; font-size: 0.6rem;
       letter-spacing: 4px; text-transform: uppercase; text-decoration: none;
       backdrop-filter: blur(6px); transition: all 0.22s;
@@ -184,7 +244,7 @@
     .vtag {
       font-family: 'Space Mono', monospace; font-size: 0.48rem; letter-spacing: 3px;
       color: var(--muted); display: flex; align-items: center; gap: 6px;
-      background: rgba(255,255,255,0.3); border: 1px solid rgba(78,134,184,0.12);
+        background: var(--vtag-bg, rgba(255,255,255,0.3)); border: 1px solid rgba(78,134,184,0.12);
       padding: 5px 14px; border-radius: 100px; backdrop-filter: blur(4px);
     }
     .vtag b { color: var(--steel); font-weight: 500; }
@@ -212,7 +272,6 @@
     .live-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 4px; padding: 24px; backdrop-filter: blur(10px); }
     .live-title { font-family: 'Bebas Neue', sans-serif; letter-spacing: 4px; font-size: 1.25rem; color: var(--dark); margin-bottom: 10px; }
     .live-sub { font-size: 0.68rem; color: var(--muted); line-height: 1.9; margin-bottom: 14px; }
-    #devlogList .entry { border: 1px solid rgba(78,134,184,0.18); background: rgba(255,255,255,0.45); border-radius: 3px; padding: 12px; margin-bottom: 10px; }
     #devlogList h4 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 1rem; color: var(--dark); margin-bottom: 4px; }
     #devlogList .meta { font-family: 'Space Mono', monospace; font-size: 0.45rem; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
     #devlogList div { color: var(--text); font-size: 0.68rem; line-height: 1.8; }
@@ -225,7 +284,8 @@
     .sec-h em { font-style: normal; color: var(--accent); }
     .fg { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; }
     .fc { background: var(--card-bg); border: 1px solid var(--card-border); padding: 34px 28px; border-radius: 4px; backdrop-filter: blur(10px); position: relative; overflow: hidden; transition: transform 0.25s, box-shadow 0.25s, background 0.25s; }
-    .fc:hover { background: rgba(255,255,255,0.75); transform: translateY(-4px); box-shadow: 0 12px 36px rgba(46,111,168,0.1); }
+    .fc:hover { background: var(--fc-hover-bg, rgba(255,255,255,0.75)); transform: translateY(-4px); box-shadow: 0 12px 36px rgba(46,111,168,0.1); }
+    #devlogList .entry { border: 1px solid rgba(78,134,184,0.18); background: var(--entry-bg, rgba(255,255,255,0.45)); border-radius: 3px; padding: 12px; margin-bottom: 10px; }
     .fi { font-size: 1.65rem; margin-bottom: 14px; display: block; }
     .ft { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 4px; color: var(--dark); margin-bottom: 8px; }
     .fd { font-size: 0.75rem; line-height: 1.95; color: var(--muted); font-weight: 300; }
@@ -263,6 +323,10 @@
       .nav-links, .nav-tag { display: none; }
       .features, .about, .stats, .dl-sec, .live-wrap { padding: 60px 20px; }
     }
+
+      @media (max-width: 700px) {
+        #theme-toggle { display: flex; }
+      }
   </style>
 </head>
 <body>
@@ -285,6 +349,10 @@
       <li><a href="#download">Download</a></li>
     </ul>
     <div class="nav-tag">v1.0.0 STABLE</div>
+      <button id="theme-toggle" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+      </button>
   </nav>
 
   <section class="hero">
@@ -397,6 +465,14 @@
   <script>
     // Custom cursor
     const cur = document.getElementById('cur'), ring = document.getElementById('cur-ring');
+
+      // Theme toggle
+      document.getElementById('theme-toggle').addEventListener('click', function() {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('aero_theme', next);
+      });
+
     let mx = 0, my = 0, rx = 0, ry = 0;
     document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
     (function animCursor() {
